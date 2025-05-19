@@ -432,6 +432,34 @@ impl FwCfg {
         }
     }
 
+    pub fn populate_fw_cfg(
+        &mut self,
+        mem_size: Option<usize>,
+        kernel: Option<File>,
+        initramfs: Option<File>,
+        cmdline: Option<std::ffi::CString>,
+        fw_cfg_item_list: Option<Vec<FwCfgItem>>,
+    ) -> Result<()> {
+        if mem_size.is_some() {
+            self.add_e820(mem_size.unwrap())?
+        }
+        if kernel.is_some() {
+            self.add_kernel_data(&kernel.unwrap())?;
+        }
+        if cmdline.is_some() {
+            self.add_kernel_cmdline(cmdline.unwrap());
+        }
+        if initramfs.is_some() {
+            self.add_initramfs_data(&initramfs.unwrap())?
+        }
+        if fw_cfg_item_list.is_some() {
+            for item in fw_cfg_item_list.unwrap() {
+                self.add_item(item)?;
+            }
+        }
+        Ok(())
+    }
+
     pub fn add_e820(&mut self, mem_size: usize) -> Result<()> {
         #[cfg(target_arch = "x86_64")]
         let mut mem_regions = vec![
