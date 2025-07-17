@@ -2494,6 +2494,10 @@ impl Vm {
                     // In case of SEV-SNP guest ACPI tables are provided via
                     // IGVM. So skip the creation of ACPI tables and set the
                     // rsdp addr to None.
+                    #[cfg(all(feature = "fw_cfg", not(target_arch = "riscv64")))]
+                    if fw_cfg_config.acpi_tables {
+                        self.create_acpi_tables();
+                    }
                     None
                 } else {
                     self.create_acpi_tables()
